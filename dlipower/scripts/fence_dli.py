@@ -33,7 +33,7 @@ device_opt = [
 ]
 
 
-if __name__ == "__main__":
+def main():
     # Parse the input into a dict named options
     options={}
     unknown_options=[]

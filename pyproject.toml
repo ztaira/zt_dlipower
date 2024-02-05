@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "dlipower"
+version = "1.1.0"
+description = "Control digital loggers web power switch"
+authors = ["Zach Taira"]
+readme = "README.md"
+keywords = ["network", "power switch", "ups"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: POSIX :: SunOS/Solaris",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+    "Topic :: System :: Power (UPS)",
+]
+license = "BSD"
+homepage = "https://github.com/ztaira/python-dlipower/"
+repository = "https://github.com/ztaira/python-dlipower"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.3"
+
+[tool.poetry.group.documentation.dependencies]
+# missing dhubbard-sphinx-markdown-tables b/c it depends on python3.6
+markdown = "^3.5.2"
+pymdown-extensions = "^10.7"
+guzzle-sphinx-theme = "^0.7.11"
+markdown-include = "^0.8.1"
+nbsphinx = "^0.9.3"
+pygments = "^2.17.2"
+recommonmark = "^0.7.1"
+sphinx-rtd-theme = "^2.0.0"
+
+[tool.poetry.group.doc-build.dependencies]
+# missing dhubbard-sphinx-markdown-tables b/c it depends on python3.6
+markdown = "^3.5.2"
+pymdown-extensions = "^10.7"
+guzzle-sphinx-theme = "^0.7.11"
+markdown-include = "^0.8.1"
+nbsphinx = "^0.9.3"
+pygments = "^2.17.2"
+recommonmark = "^0.7.1"
+sphinx-rtd-theme = "^2.0.0"
+mkdocs-bootstrap4 = "^0.1.5"
+mkdocs-material = "^9.5.7"
+
+[tool.poetry.group.dev.dependencies]
+vcrpy-unittest = "^0.1.7"
+requests-mock = "^1.11.0"
+tox = "^4.12.1"
+
+[tool.poetry.scripts]
+dlipower = 'dlipower.scripts.dlipower:main'
+fence_dli = 'dlipower.scripts.fence_dli:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool."screwdrivercd.version"]
+version_type = "sdv4_SD_BUILD"

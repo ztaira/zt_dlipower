@@ -75,7 +75,7 @@ def __command_on_outlets(action, outlet_range):
         sys.exit(1)
  
 
-if __name__ == "__main__":
+def main():
     usage = "usage: %prog [options] [status|on|off|cycle|get_outlet_name|set_outlet_name] [range|arg]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('--hostname', dest='hostname', default=None,
