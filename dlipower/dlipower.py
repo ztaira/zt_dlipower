@@ -97,18 +97,16 @@ Outlet	Name           	State
 7	2TB Drive      	OFF
 8	Cable Modem1   	OFF
 """
-
 import hashlib
+import json
 import logging
 import multiprocessing
 import os
-import json
-import requests
-import requests.exceptions
 import time
-import urllib3
 from urllib.parse import quote
 
+import requests.exceptions
+import urllib3
 from bs4 import BeautifulSoup
 
 

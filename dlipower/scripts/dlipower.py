@@ -2,7 +2,6 @@
 # Copyright (c) 2009-2015, Dwight Hubbard
 # Copyrights licensed under the New BSD License
 # See the accompanying LICENSE.txt file for terms.
-
 """
 ###############################################################
 Digital Loggers Web Power Switch management
@@ -25,10 +24,12 @@ Digital Loggers Web Power Switch management
                 Ethernet Power Controller III
 """
 from __future__ import print_function
-import sys
+
 import optparse
-from dlipower import PowerSwitch
+import sys
+
 from dlipower import DLIPowerException
+from dlipower import PowerSwitch
 
 
 def _block_to_list(block):

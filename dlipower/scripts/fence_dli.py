@@ -2,7 +2,6 @@
 # Copyright (c) 2009-2015, Dwight Hubbard
 # Copyrights licensed under the New BSD License
 # See the accompanying LICENSE.txt file for terms.
-
 """
 Stonith Agent for Digital Loggers Network Power Switches
 for Linux HA Clusters
@@ -18,8 +17,10 @@ network power switches:
 It may work for other models of Digital Loggers power switches as well
 """
 from __future__ import print_function
-import dlipower
+
 import sys
+
+import dlipower
 
 # This fencing driver uses the dlipower python module to manage the power switch
 # the dlipower package installs a dlipower.py script that provides a command line
