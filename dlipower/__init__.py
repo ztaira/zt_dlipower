@@ -6,8 +6,9 @@ from .dlipower import Outlet, PowerSwitch, DLIPowerException
 
 try:
     import pkg_resources
+
     __version__ = pkg_resources.get_distribution("dlipower").version
 except ImportError:
-    __version__ = str('0.0.0')
+    __version__ = str("0.0.0")
 
-__all__ = ['dlipower']
+__all__ = ["dlipower"]
