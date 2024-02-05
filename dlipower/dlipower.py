@@ -107,6 +107,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 from urllib.parse import quote
 
 import requests.exceptions
@@ -486,17 +487,22 @@ class PowerSwitch:
         logger.debug(f"Response content: {result}")
         return result
 
-    def determine_outlet(self, outlet=None) -> int:
+    def determine_outlet(self, outlet: Union[str, int]) -> int:
         """Get the correct outlet number from the outlet passed in, this
         allows specifying the outlet by the name and making sure the
         returned outlet is an int
         """
         outlets = self.statuslist()
-        if outlet and outlets and isinstance(outlet, str):
+        if outlet and outlets and isinstance(outlet, (int, str)):
             for plug in outlets:
                 plug_name = plug[1]
-                if plug_name and plug_name.strip() == outlet.strip():
-                    return int(plug[0])
+                plug_number = int(plug[0])
+                if isinstance(outlet, str):
+                    if plug_name and plug_name.strip() == outlet.strip():
+                        return plug_number
+                elif isinstance(outlet, int):
+                    if plug_number and plug_number == outlet:
+                        return plug_number
         try:
             outlet_int = int(outlet)
             if outlet_int <= 0 or outlet_int > len(self):
@@ -505,7 +511,7 @@ class PowerSwitch:
         except ValueError as err:
             raise DLIPowerException("Outlet name '%s' unknown" % outlet) from err
 
-    def get_outlet_name(self, outlet=0) -> str:
+    def get_outlet_name(self, outlet: int = 0) -> str:
         """Return the name of the outlet"""
         outlet = self.determine_outlet(outlet)
         outlets = self.statuslist()
