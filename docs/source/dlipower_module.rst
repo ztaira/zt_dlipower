@@ -39,4 +39,3 @@ Powerswitch
 -----------
 .. autoclass:: dlipower.PowerSwitch
    :members:
-
