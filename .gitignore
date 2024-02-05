@@ -18,3 +18,4 @@ dlipower/package_metadata.json
 /pytest_*.xml
 
 **/__pycache__/
+artifacts/
