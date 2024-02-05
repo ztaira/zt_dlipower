@@ -103,6 +103,10 @@ import logging
 import multiprocessing
 import os
 import time
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 from urllib.parse import quote
 
 import requests.exceptions
@@ -148,7 +152,13 @@ class Outlet:
 
     use_description = True
 
-    def __init__(self, switch, outlet_number, description=None, state=None):
+    def __init__(
+        self,
+        switch: "PowerSwitch",
+        outlet_number: int,
+        description: Optional[str] = None,
+        state: Optional[str] = None,
+    ):
         self.switch = switch
         self.outlet_number = outlet_number
         self.description = description
@@ -170,7 +180,7 @@ class Outlet:
     def __repr__(self):
         return "<dlipower_outlet '%s'>" % self.__unicode__()
 
-    def _repr_html_(self):  # pragma: no cover
+    def _repr_html_(self) -> str:  # pragma: no cover
         """Display representation as an html table when running in ipython"""
         return """<table>
     <tr><th>Description</th><th>Outlet Number</th><th>State</th></tr>
@@ -180,7 +190,7 @@ class Outlet:
         )
 
     @property
-    def state(self):
+    def state(self) -> Optional[str]:
         """Return the outlet state"""
         return self._state
 
@@ -193,15 +203,15 @@ class Outlet:
         if value in ["on", "ON", "1"]:
             self.on()
 
-    def off(self):
+    def off(self) -> bool:
         """Turn the outlet off"""
         return self.switch.off(self.outlet_number)
 
-    def on(self):  # pylint: disable=invalid-name
+    def on(self) -> bool:  # pylint: disable=invalid-name
         """Turn the outlet on"""
         return self.switch.on(self.outlet_number)
 
-    def rename(self, new_name):
+    def rename(self, new_name) -> bool:
         """
         Rename the outlet
         :param new_name: New name for the outlet
@@ -210,7 +220,7 @@ class Outlet:
         return self.switch.set_outlet_name(self.outlet_number, new_name)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name or description of the outlet"""
         return self.switch.get_outlet_name(self.outlet_number)
 
@@ -229,13 +239,13 @@ class PowerSwitch:
 
     def __init__(
         self,
-        userid=None,
-        password=None,
-        hostname=None,
-        timeout=None,
+        userid: Optional[str] = None,
+        password: Optional[str] = None,
+        hostname: Optional[str] = None,
+        timeout: Optional[float] = None,
         cycletime=None,
-        retries=None,
-        use_https=False,
+        retries: Optional[int] = None,
+        use_https: bool = False,
     ):
         """
         Class initializaton
@@ -244,7 +254,7 @@ class PowerSwitch:
             retries = RETRIES
         config = self.load_configuration()
         if retries:
-            self.retries = retries
+            self.retries: int = retries
         if userid:
             self.userid = userid
         else:
@@ -258,19 +268,19 @@ class PowerSwitch:
         else:
             self.hostname = config["hostname"]
         if timeout:
-            self.timeout = float(timeout)
+            self.timeout: float = float(timeout)
         else:
             self.timeout = config["timeout"]
         if cycletime:
             self.cycletime = float(cycletime)
         else:
             self.cycletime = config["cycletime"]
-        self.scheme = "http"
+        self.scheme: str = "http"
         if use_https:
             self.scheme = "https"
-        self.base_url = "%s://%s" % (self.scheme, self.hostname)
-        self._is_admin = True
-        self.session = requests.Session()
+        self.base_url: str = "%s://%s" % (self.scheme, self.hostname)
+        self._is_admin: bool = True
+        self.session: Optional[requests.Session] = requests.Session()
         self.login()
 
     def __len__(self):
@@ -295,7 +305,7 @@ class PowerSwitch:
             output += "%d\t%-15.15s\t%s\n" % (item[0], item[1], item[2])
         return output
 
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         """
         __repr__ in an html table format
         """
@@ -336,7 +346,7 @@ class PowerSwitch:
             return outlets[0]
         return outlets
 
-    def login(self):
+    def login(self) -> None:
         self.secure_login = False
         self.session = requests.Session()
         try:
@@ -398,7 +408,7 @@ class PowerSwitch:
             if "Set-Cookie" in response.headers:
                 self.secure_login = True
 
-    def load_configuration(self):
+    def load_configuration(self) -> Dict:
         """Return a configuration dictionary"""
         if os.path.isfile(CONFIG_FILE):
             with open(CONFIG_FILE, "r") as file_h:
@@ -410,7 +420,7 @@ class PowerSwitch:
             return config
         return CONFIG_DEFAULTS
 
-    def save_configuration(self):
+    def save_configuration(self) -> None:
         """Update the configuration file with the object's settings"""
         # Get the configuration from the config file or set to the defaults
         config = self.load_configuration()
@@ -429,7 +439,7 @@ class PowerSwitch:
                 os.fchmod(file_h.fileno(), 0o0600)
             json.dump(config, file_h, sort_keys=True, indent=4)
 
-    def verify(self):
+    def verify(self) -> bool:
         """Verify we can reach the switch, returns true if ok"""
         if self.geturl():
             return True
@@ -476,7 +486,7 @@ class PowerSwitch:
         logger.debug(f"Response content: {result}")
         return result
 
-    def determine_outlet(self, outlet=None):
+    def determine_outlet(self, outlet=None) -> int:
         """Get the correct outlet number from the outlet passed in, this
         allows specifying the outlet by the name and making sure the
         returned outlet is an int
@@ -495,7 +505,7 @@ class PowerSwitch:
         except ValueError as err:
             raise DLIPowerException("Outlet name '%s' unknown" % outlet) from err
 
-    def get_outlet_name(self, outlet=0):
+    def get_outlet_name(self, outlet=0) -> str:
         """Return the name of the outlet"""
         outlet = self.determine_outlet(outlet)
         outlets = self.statuslist()
@@ -505,13 +515,13 @@ class PowerSwitch:
                     return plug[1]
         return "Unknown"
 
-    def set_outlet_name(self, outlet=0, name="Unknown"):
+    def set_outlet_name(self, outlet=0, name="Unknown") -> bool:
         """Set the name of an outlet"""
         self.determine_outlet(outlet)
         self.geturl(url="unitnames.cgi?outname%s=%s" % (outlet, quote(name)))
         return self.get_outlet_name(outlet) == name
 
-    def off(self, outlet=0):
+    def off(self, outlet=0) -> bool:
         """Turn off a power to an outlet
         False = Success
         True = Fail
@@ -519,7 +529,7 @@ class PowerSwitch:
         self.geturl(url="outlet?%d=OFF" % self.determine_outlet(outlet))
         return self.status(outlet) != "OFF"
 
-    def on(self, outlet=0):  # pylint: disable=invalid-name
+    def on(self, outlet=0) -> bool:  # pylint: disable=invalid-name
         """Turn on power to an outlet
         False = Success
         True = Fail
@@ -527,7 +537,7 @@ class PowerSwitch:
         self.geturl(url="outlet?%d=ON" % self.determine_outlet(outlet))
         return self.status(outlet) != "ON"
 
-    def cycle(self, outlet=0):
+    def cycle(self, outlet=0) -> bool:
         """Cycle power to an outlet
         False = Power off Success
         True = Power off Fail
@@ -540,13 +550,13 @@ class PowerSwitch:
         self.on(outlet)
         return False
 
-    def statuslist(self):
+    def statuslist(self) -> List[Tuple[int, str, str]]:
         """Return the status of all outlets in a list,
         each item will contain 3 items plugnumber, hostname and state"""
         outlets = []
         url = self.geturl("index.htm")
         if not url:
-            return None
+            return []
         soup = BeautifulSoup(url, "html.parser")
         # Get the root of the table containing the port status info
         try:
@@ -559,19 +569,19 @@ class PowerSwitch:
                 self._is_admin = False
                 root = soup.findAll("th", text="#")[0].parent.parent.parent
             except IndexError:
-                return None
+                return []
         for temp in root.findAll("tr"):
             columns = temp.findAll("td")
             if len(columns) == 5:
                 plugnumber = columns[0].string
                 hostname = columns[1].string
                 state = columns[2].find("font").string.upper()
-                outlets.append([int(plugnumber), hostname, state])
+                outlets.append((int(plugnumber), hostname, state))
         if self.__len == 0:
             self.__len = len(outlets)
         return outlets
 
-    def printstatus(self):
+    def printstatus(self) -> None:
         """Print the status off all the outlets as a table to stdout"""
         if not self.statuslist():
             print("Unable to communicate to the Web power switch at %s" % self.hostname)
@@ -581,7 +591,7 @@ class PowerSwitch:
             print("%d\t%-15.15s\t%s" % (item[0], item[1], item[2]))
         return
 
-    def status(self, outlet=1):
+    def status(self, outlet: int = 1) -> str:
         """
         Return the status of an outlet, returned value will be one of:
         ON, OFF, Unknown
