@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zt-dlipower"
-version = "1.1.0"
+version = "0.0.0"
 description = "Control digital loggers web power switch"
 authors = ["Zach Taira"]
 readme = "README.md"
