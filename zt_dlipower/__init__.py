@@ -8,7 +8,7 @@ from .dlipower import PowerSwitch
 try:
     import pkg_resources
 
-    __version__ = pkg_resources.get_distribution("dlipower").version
+    __version__ = pkg_resources.get_distribution("zt_dlipower").version
 except ImportError:
     __version__ = str("0.0.0")
 

@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import sys
 
-import dlipower
+import zt_dlipower
 
 # This fencing driver uses the dlipower python module to manage the power switch
 # the dlipower package installs a dlipower.py script that provides a command line
@@ -101,7 +101,7 @@ def main():
     if "timeout" not in options.keys():
         options["timeout"] = None
 
-    switch = dlipower.PowerSwitch(
+    switch = zt_dlipower.PowerSwitch(
         hostname=options["ipaddr"],
         userid=options["login"],
         password=options["passwd"],

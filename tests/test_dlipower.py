@@ -2,9 +2,9 @@ from unittest import skip
 
 from vcr_unittest import VCRTestCase
 
-from dlipower import DLIPowerException
-from dlipower import Outlet
-from dlipower import PowerSwitch
+from zt_dlipower import DLIPowerException
+from zt_dlipower import Outlet
+from zt_dlipower import PowerSwitch
 
 
 class TestDLIPowerPro(VCRTestCase):

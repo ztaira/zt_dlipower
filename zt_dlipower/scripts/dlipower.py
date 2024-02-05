@@ -28,8 +28,8 @@ from __future__ import print_function
 import optparse  # pylint: disable=deprecated-module
 import sys
 
-from dlipower import DLIPowerException
-from dlipower import PowerSwitch
+from zt_dlipower import DLIPowerException
+from zt_dlipower import PowerSwitch
 
 # TODO: replace with argparse or something
 

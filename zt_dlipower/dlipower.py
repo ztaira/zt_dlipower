@@ -27,7 +27,7 @@ Examples
 
 *Connecting to a Digital Loggers Power switch*
 
->>> from dlipower import PowerSwitch
+>>> from zt_dlipower import PowerSwitch
 >>> switch = PowerSwitch(hostname='lpc.digital-loggers.com', userid='admin', password='4321')
 
 *Getting the power state (status) from the switch*
