@@ -140,10 +140,8 @@ class DLIPowerException(Exception):
     An error occurred talking the the DLI Power switch
     """
 
-    pass
 
-
-class Outlet(object):
+class Outlet:
     """
     A power outlet class
     """
@@ -199,7 +197,7 @@ class Outlet(object):
         """Turn the outlet off"""
         return self.switch.off(self.outlet_number)
 
-    def on(self):
+    def on(self):  # pylint: disable=invalid-name
         """Turn the outlet on"""
         return self.switch.on(self.outlet_number)
 
@@ -222,7 +220,7 @@ class Outlet(object):
         self.rename(new_name)
 
 
-class PowerSwitch(object):
+class PowerSwitch:
     """Powerswitch class to manage the Digital Loggers Web power switch"""
 
     __len = 0
@@ -378,9 +376,9 @@ class PowerSwitch(object):
             + fields["Challenge"]
         )
 
-        m = hashlib.md5()  # nosec - The switch we are talking to uses md5 hashes
-        m.update(form_response.encode())
-        data = {"Username": "admin", "Password": m.hexdigest()}
+        md5hash = hashlib.md5()  # nosec - The switch we are talking to uses md5 hashes
+        md5hash.update(form_response.encode())
+        data = {"Username": "admin", "Password": md5hash.hexdigest()}
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         try:
@@ -403,13 +401,12 @@ class PowerSwitch(object):
     def load_configuration(self):
         """Return a configuration dictionary"""
         if os.path.isfile(CONFIG_FILE):
-            file_h = open(CONFIG_FILE, "r")
-            try:
-                config = json.load(file_h)
-            except ValueError:
-                # Failed
-                return CONFIG_DEFAULTS
-            file_h.close()
+            with open(CONFIG_FILE, "r") as file_h:
+                try:
+                    config = json.load(file_h)
+                except ValueError:
+                    # Failed
+                    return CONFIG_DEFAULTS
             return config
         return CONFIG_DEFAULTS
 
@@ -425,16 +422,12 @@ class PowerSwitch(object):
         config["timeout"] = self.timeout
 
         # Write it to disk
-        file_h = open(CONFIG_FILE, "w")
-        # Make sure the file perms are correct before we write data
-        # that can include the password into it.
-        if hasattr(os, "fchmod"):
-            os.fchmod(file_h.fileno(), 0o0600)
-        if file_h:
+        with open(CONFIG_FILE, "w") as file_h:
+            # Make sure the file perms are correct before we write data
+            # that can include the password into it.
+            if hasattr(os, "fchmod"):
+                os.fchmod(file_h.fileno(), 0o0600)
             json.dump(config, file_h, sort_keys=True, indent=4)
-            file_h.close()
-        else:
-            raise DLIPowerException("Unable to open configuration file for write")
 
     def verify(self):
         """Verify we can reach the switch, returns true if ok"""
@@ -450,7 +443,7 @@ class PowerSwitch(object):
         result = None
         request = None
         logger.debug(f"Requesting url: {full_url}")
-        for i in range(0, self.retries):
+        for retry_num in range(0, self.retries):
             try:
                 if self.secure_login and self.session:
                     request = self.session.get(
@@ -470,11 +463,11 @@ class PowerSwitch(object):
                         verify=False,
                         allow_redirects=True,
                     )  # nosec
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException as err:
                 logger.warning(
-                    "Request timed out - %d retries left.", self.retries - i - 1
+                    "Request timed out - %d retries left.", self.retries - retry_num - 1
                 )
-                logger.exception("Caught exception %s", str(e))
+                logger.exception("Caught exception %s", str(err))
                 continue
             if request.status_code == 200:
                 result = request.content
@@ -496,11 +489,11 @@ class PowerSwitch(object):
                     return int(plug[0])
         try:
             outlet_int = int(outlet)
-            if outlet_int <= 0 or outlet_int > self.__len__():
+            if outlet_int <= 0 or outlet_int > len(self):
                 raise DLIPowerException("Outlet number %d out of range" % outlet_int)
             return outlet_int
-        except ValueError:
-            raise DLIPowerException("Outlet name '%s' unknown" % outlet)
+        except ValueError as err:
+            raise DLIPowerException("Outlet name '%s' unknown" % outlet) from err
 
     def get_outlet_name(self, outlet=0):
         """Return the name of the outlet"""
@@ -526,7 +519,7 @@ class PowerSwitch(object):
         self.geturl(url="outlet?%d=OFF" % self.determine_outlet(outlet))
         return self.status(outlet) != "OFF"
 
-    def on(self, outlet=0):
+    def on(self, outlet=0):  # pylint: disable=invalid-name
         """Turn on power to an outlet
         False = Success
         True = Fail
@@ -582,7 +575,7 @@ class PowerSwitch(object):
         """Print the status off all the outlets as a table to stdout"""
         if not self.statuslist():
             print("Unable to communicate to the Web power switch at %s" % self.hostname)
-            return None
+            return
         print("Outlet\t%-15.15s\tState" % "Name")
         for item in self.statuslist():
             print("%d\t%-15.15s\t%s" % (item[0], item[1], item[2]))
@@ -612,19 +605,17 @@ class PowerSwitch(object):
             result = getattr(self, command)(outlets[0])
             if isinstance(result, bool):
                 return result
-            else:
-                return [result]
-        pool = multiprocessing.Pool(processes=len(outlets))
-        result = [
-            value
-            for value in pool.imap(
-                _call_it,
-                [(self, command, (outlet,)) for outlet in outlets],
-                chunksize=1,
+            return [result]
+        with multiprocessing.Pool(processes=len(outlets)) as pool:
+            result = list(
+                pool.imap(
+                    _call_it,
+                    [(self, command, (outlet,)) for outlet in outlets],
+                    chunksize=1,
+                )
             )
-        ]
-        pool.close()
-        pool.join()
+            pool.close()
+            pool.join()
         if isinstance(result[0], bool):
             for value in result:
                 if value:

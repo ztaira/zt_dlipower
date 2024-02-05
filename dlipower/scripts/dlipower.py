@@ -25,17 +25,26 @@ Digital Loggers Web Power Switch management
 """
 from __future__ import print_function
 
-import optparse
+import optparse  # pylint: disable=deprecated-module
 import sys
 
 from dlipower import DLIPowerException
 from dlipower import PowerSwitch
 
+# TODO: replace with argparse or something
+
 
 def _block_to_list(block):
     """Convert a range block into a numeric list
-    input "1-3,17,19-20"
-    output=[1,2,3,17,19,20]
+
+    >>> _block_to_list("1,2,3,4,5")
+    ['1', '2', '3', '4', '5']
+    >>> _block_to_list("6-9")
+    ['6', '7', '8', '9']
+    >>> _block_to_list("6-10")
+    ['06', '07', '08', '09', '10']
+    >>> _block_to_list("1-3,17,19-20")
+    ['1', '2', '3', '17', '19', '20']
     """
     block += ","
     result = []
@@ -47,7 +56,7 @@ def _block_to_list(block):
                 val2 = val
                 val2_len = len(val2)
                 # result += range(int(val1),int(val2)+1)
-                for value in outlet_range(int(val1), int(val2) + 1):
+                for value in range(int(val1), int(val2) + 1):
                     result.append(str(value).zfill(val2_len))
                 val = ""
                 val1 = None
@@ -57,7 +66,7 @@ def _block_to_list(block):
                 val1_len = len(val1)
                 val = ""
             if letter == ",":
-                if val1 != None:
+                if val1 is not None:
                     result.append(val1.zfill(val1_len))
             else:
                 in_range = True
@@ -66,13 +75,14 @@ def _block_to_list(block):
     return result
 
 
-def __command_on_outlets(action, outlet_range):
+def __command_on_outlets(action, outlet_range, switch, debug: bool = True):
     """Execute given action on switch with range argument.  Handle exceptions."""
     try:
         return switch.command_on_outlets(action, outlet_range)
-    except DLIPowerException as e:
-        if not options.quiet:
-            print(e, file=sys.stderr)
+    except DLIPowerException as err:
+        # TODO: convert to actual logging calls
+        if debug:
+            print(err, file=sys.stderr)
         sys.exit(1)
 
 
@@ -120,13 +130,6 @@ def main():
         action="store_true",
         help="Use ssl to connect to the switch",
     )
-    parser.add_option(
-        "--quiet",
-        dest="quiet",
-        default=False,
-        action="store_true",
-        help="Be quiet, don't print error messages only return error return codes (default False)",
-    )
     (options, args) = parser.parse_args()
 
     switch = PowerSwitch(
@@ -144,25 +147,29 @@ def main():
         outlet_range = _block_to_list(",".join(args[1:]))
         if len(args) > 1:
             if operation in ["status"]:
-                print(",".join(__command_on_outlets("status", outlet_range)))
+                print(",".join(__command_on_outlets("status", outlet_range, switch)))
             elif operation in ["on", "poweron"]:
-                rc = __command_on_outlets("on", outlet_range)
-                if rc and not options.quiet:
+                rc = __command_on_outlets("on", outlet_range, switch)
+                if rc:
                     print("Power on operation failed", file=sys.stderr)
                 sys.exit(rc)
             elif operation in ["off", "poweroff"]:
-                rc = __command_on_outlets("off", outlet_range)
-                if rc and not options.quiet:
+                rc = __command_on_outlets("off", outlet_range, switch)
+                if rc:
                     print("Power off operation failed", file=sys.stderr)
             elif operation in ["cycle"]:
-                sys.exit(__command_on_outlets("cycle", outlet_range))
+                sys.exit(__command_on_outlets("cycle", outlet_range, switch))
             elif operation in [
                 "get_name",
                 "getname",
                 "get_outlet_name",
                 "getoutletname",
             ]:
-                print(",".join(__command_on_outlets("get_outlet_name", outlet_range)))
+                print(
+                    ",".join(
+                        __command_on_outlets("get_outlet_name", outlet_range, switch)
+                    )
+                )
             elif operation in [
                 "set_name",
                 "setname",

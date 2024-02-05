@@ -58,7 +58,7 @@ def main():
                     unknown_options.append(key)
 
         # Print a warning about unknown options that where passed
-        if len(unknown_options):
+        if unknown_options:
             print(
                 "Unknown options, ignoring: ",
                 " ".join(unknown_options),
@@ -101,7 +101,7 @@ def main():
     if "timeout" not in options.keys():
         options["timeout"] = None
 
-    switch = dlipower.powerswitch(
+    switch = dlipower.PowerSwitch(
         hostname=options["ipaddr"],
         userid=options["login"],
         password=options["passwd"],
