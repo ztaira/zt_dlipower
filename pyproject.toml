@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dlipower"
+name = "zt-dlipower"
 version = "1.1.0"
 description = "Control digital loggers web power switch"
 authors = ["Zach Taira"]
@@ -29,8 +29,8 @@ classifiers = [
     "Topic :: System :: Power (UPS)",
 ]
 license = "BSD"
-homepage = "https://github.com/ztaira/python-dlipower/"
-repository = "https://github.com/ztaira/python-dlipower"
+homepage = "https://github.com/ztaira/zt-dlipower/"
+repository = "https://github.com/ztaira/zt-dlipower"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -78,8 +78,8 @@ pytest = "^8.0.0"
 pylint = "^3.0.3"
 
 [tool.poetry.scripts]
-dlipower = 'dlipower.scripts.dlipower:main'
-fence_dli = 'dlipower.scripts.fence_dli:main'
+dlipower = 'zt_dlipower.scripts.dlipower:main'
+fence_dli = 'zt_dlipower.scripts.fence_dli:main'
 
 [build-system]
 requires = ["poetry-core"]
