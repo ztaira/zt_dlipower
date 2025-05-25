@@ -120,17 +120,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # Global settings
-TIMEOUT = 20
-RETRIES = 3
-CYCLETIME = 3
 CONFIG_DEFAULTS = {
-    "timeout": TIMEOUT,
-    "cycletime": CYCLETIME,
+    "retries": 3,
+    "timeout": 2,
+    "cycletime": 3,
     "userid": "admin",
     "password": "4321",
     "hostname": "192.168.0.100",
 }
-CONFIG_FILE = os.path.expanduser("~/.dlipower.conf")
+CONFIG_FILE = os.path.expanduser(os.getenv("ZTDLIPOWER_CONFIG", "~/.dlipower.conf"))
 
 
 def _call_it(params):  # pragma: no cover
@@ -244,38 +242,38 @@ class PowerSwitch:
         password: Optional[str] = None,
         hostname: Optional[str] = None,
         timeout: Optional[float] = None,
-        cycletime=None,
+        cycletime: Optional[float] = None,
         retries: Optional[int] = None,
         use_https: bool = False,
     ):
         """
         Class initializaton
         """
-        if not retries:
-            retries = RETRIES
         config = self.load_configuration()
-        if retries:
-            self.retries: int = retries
         if userid:
-            self.userid = userid
+            self.userid = str(userid)
         else:
-            self.userid = config["userid"]
+            self.userid = str(config["userid"])
         if password:
-            self.password = password
+            self.password = str(password)
         else:
-            self.password = config["password"]
+            self.password = str(config["password"])
         if hostname:
-            self.hostname = hostname
+            self.hostname = str(hostname)
         else:
-            self.hostname = config["hostname"]
+            self.hostname = str(config["hostname"])
         if timeout:
-            self.timeout: float = float(timeout)
+            self.timeout = float(timeout)
         else:
-            self.timeout = config["timeout"]
+            self.timeout = float(config["timeout"])
         if cycletime:
             self.cycletime = float(cycletime)
         else:
-            self.cycletime = config["cycletime"]
+            self.cycletime = float(config["cycletime"])
+        if retries:
+            self.retries = int(retries)
+        else:
+            self.retries = int(config["retries"])
         self.scheme: str = "http"
         if use_https:
             self.scheme = "https"
@@ -643,3 +641,4 @@ class PowerSwitch:
 
 if __name__ == "__main__":  # pragma: no cover
     PowerSwitch().printstatus()
+    print(CONFIG_FILE)
